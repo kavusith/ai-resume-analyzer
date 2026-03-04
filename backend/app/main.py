@@ -3,27 +3,23 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.database import engine, Base
 from app.routes import resume
-from app.models import resume as resume_model  # ensure model is imported
+from app.models import resume as resume_model
 
-# Create DB tables
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(
-    title="AI Resume Analyzer API",
-    description="Analyze resumes against job descriptions using AI",
-    version="1.0.0"
-)
+app = FastAPI(title="AI Resume Analyzer API", version="1.0.0")
 
-# CORS
+# Fix CORS
+origins = [origin.strip() for origin in settings.ALLOWED_ORIGINS.split(",")]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.ALLOWED_ORIGINS.split(","),
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Routes
 app.include_router(resume.router)
 
 @app.get("/")
